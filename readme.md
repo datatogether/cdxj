@@ -12,10 +12,10 @@ flexiblity in the inclusion of additional data.
 
 ## Usage
 
-#### func  CannonicalizeURL
+#### func  CanonicalizeURL
 
 ```go
-func CannonicalizeURL(rawurl string) string
+func CanonicalizeURL(rawurl string) string
 ```
 Canonicalization is applied to URIs to remove trivial differences in the URIs
 that do not reflect that the URI reference different resources. Examples include
@@ -25,22 +25,14 @@ Typically, it will be applied to the searchable URIs in CDXJ files. You can,
 however, use any canonicalization scheme you care for (including none). You must
 simple ensure that the same canonicalization process is applied to the URIs when
 performing searches. Otherwise they may not match correctly. TODO - import
-github.com/puerkitobio/purell to cannonicalize urls
+github.com/puerkitobio/purell to canonicalize urls
 
-#### func  ParseSURTUrl
-
-```go
-func ParseSURTUrl(surturl string) (string, error)
-```
-ParseSURTUrl turns a SURT'ed url back into a normal Url TODO - should accept
-SURT urls that contain a scheme
-
-#### func  SURT
+#### func  SURTUrl
 
 ```go
-func SURT(rawurl string) (string, error)
+func SURTUrl(rawurl string) (string, error)
 ```
-SURT is a transformation applied to URIs which makes their left-to-right
+SURTUrl is a transformation applied to URIs which makes their left-to-right
 representation better match the natural hierarchy of domain names. A URI
 `<scheme://domain.tld/path?query>` has SURT form
 `<scheme://(tld,domain,)/path?query>`. Conversion to SURT form also involves
@@ -48,6 +40,14 @@ making all characters lowercase, and changing the 'https' scheme to 'http'.
 Further, the '/' after a URI authority component -- for example, the third slash
 in a regular HTTP URI -- will only appear in the SURT form if it appeared in the
 plain URI form.
+
+#### func  UnSURTUrl
+
+```go
+func UnSURTUrl(surturl string) (string, error)
+```
+UnSURTUrl turns a SURT'ed url back into a normal Url TODO - should accept SURT
+urls that contain a scheme
 
 #### type Reader
 
@@ -74,7 +74,15 @@ NewReader returns a new Reader that reads from r.
 ```go
 func (r *Reader) Read() (*Record, error)
 ```
-Read reads a record from the reader
+Read reads a record from the reader err io.EOF will be returned when the last
+record is reached
+
+#### func (*Reader) ReadAll
+
+```go
+func (r *Reader) ReadAll() ([]*Record, error)
+```
+ReadAll consumes the entire reader, returning a slice of records
 
 #### type Record
 
@@ -118,7 +126,7 @@ MarshalCDXJ outputs a CDXJ representation of r
 #### func (*Record) UnmarshalCDXJ
 
 ```go
-func (r *Record) UnmarshalCDXJ(data []byte) (err, error)
+func (r *Record) UnmarshalCDXJ(data []byte) (err error)
 ```
 UnmarshalCDXJ reads a cdxj record from a byte slice
 
