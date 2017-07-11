@@ -119,17 +119,22 @@ func CannonicalizeURL(rawurl string) string {
 // form if it appeared in the plain URI form.
 func SURTUrl(rawurl string) (string, error) {
 	rawurl = strings.ToLower(rawurl)
+
+	// TODO - if the query param contains a url of some kind, and the scheme is missing
+	// this will fail, probably going to need to use regex :/
+	if !strings.Contains(rawurl, "://") {
+		rawurl = "http://" + rawurl
+	}
+
 	u, err := url.Parse(rawurl)
 	if err != nil {
 		return rawurl, err
 	}
 
-	// TODO - this splits *everything*, so as an example example.co.uk
-	// would SURT to "uk,co,example", ditto for subdomains. Is this correct?
 	s := strings.Split(u.Hostname(), ".")
 	reverseSlice(s)
 
-	surt := fmt.Sprintf("(%s,)%s", u.Scheme, strings.Join(s, ","), u.Path)
+	surt := fmt.Sprintf("(%s,)%s", strings.Join(s, ","), u.Path)
 	if u.RawQuery != "" {
 		surt += fmt.Sprintf("?%s", u.RawQuery)
 	}

@@ -6,12 +6,39 @@ import (
 	"time"
 )
 
+func TestSURTUrl(t *testing.T) {
+	cases := []struct {
+		in, out string
+		err     error
+	}{
+		{"cnn.com/world", "(com,cnn,)/world>", nil},
+		{"http://cnn.com/world", "(com,cnn,)/world>", nil},
+		{"https://cnn.com/world", "(com,cnn,)/world>", nil},
+		{"ftp://cnn.co.uk/world?foo=bar", "(uk,co,cnn,)/world?foo=bar>", nil},
+	}
+
+	for i, c := range cases {
+		got, err := SURTUrl(c.in)
+		if err != c.err {
+			t.Errorf("case %d error mismatch: %s != %s", i, c.err, err)
+			continue
+		}
+
+		if c.out != got {
+			t.Errorf("case %d mismatch. expected: '%s', got: '%s'", i, c.out, got)
+			continue
+		}
+	}
+}
+
 func TestUnSURTUrl(t *testing.T) {
 	cases := []struct {
 		in, out string
 		err     error
 	}{
 		{"(com,cnn,)/world", "cnn.com/world", nil},
+		{"com,cnn,)/world>", "cnn.com/world", nil},
+		{"com,cnn)/world", "cnn.com/world", nil},
 		{"(uk,co,cnn,)/world?foo=bar", "cnn.co.uk/world?foo=bar", nil},
 	}
 

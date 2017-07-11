@@ -7,7 +7,7 @@ import (
 )
 
 // writer will write the following header:
-var header = []byte("!OpenWayback-CDXJ 1.0")
+var header = []byte("!OpenWayback-CDXJ 1.0\n")
 
 // Writer writes to an io.Writer, create one with NewWriter
 // You *must* call call Close to write the record to the
