@@ -105,8 +105,8 @@ func (r *Record) MarshalCDXJ() ([]byte, error) {
 // You must simple ensure that the same canonicalization process is
 // applied to the URIs when performing searches.
 // Otherwise they may not match correctly.
-// TODO - import github.com/puerkitobio/purell to cannonicalize urls
-func CannonicalizeURL(rawurl string) string {
+// TODO - import github.com/puerkitobio/purell to canonicalize urls
+func CanonicalizeURL(rawurl string) string {
 	return rawurl
 }
 
