@@ -3,6 +3,7 @@ package cdxj
 import (
 	"bufio"
 	"bytes"
+	"io"
 )
 
 // A Reader reads records from a CSV-encoded file.
@@ -20,12 +21,13 @@ type Reader struct {
 
 // NewReader returns a new Reader that reads from r.
 func NewReader(r io.Reader) *Reader {
-	return Reader{
+	return &Reader{
 		s: bufio.NewScanner(r),
 	}
 }
 
 // Read reads a record from the reader
+// err io.EOF will be returned when the last record is reached
 func (r *Reader) Read() (*Record, error) {
 	rec := &Record{}
 	// scan until we have a non-header record
@@ -42,4 +44,22 @@ func (r *Reader) Read() (*Record, error) {
 
 	r.record++
 	return rec, nil
+}
+
+// ReadAll consumes the entire reader, returning a slice of records
+func (r *Reader) ReadAll() ([]*Record, error) {
+	records := []*Record{}
+	for {
+		rec, err := r.Read()
+		if err != nil {
+			if err.Error() == "EOF" {
+				break
+			}
+			return records, err
+		}
+
+		records = append(records, rec)
+	}
+
+	return records, nil
 }

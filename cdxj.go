@@ -11,7 +11,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/url"
 	"strings"
 	"time"
@@ -44,11 +43,11 @@ type Record struct {
 }
 
 // UnmarshalCDXJ reads a cdxj record from a byte slice
-func (r *Record) UnmarshalCDXJ(data []byte) (err, error) {
+func (r *Record) UnmarshalCDXJ(data []byte) (err error) {
 	rdr := bytes.NewReader(data)
 	buf := bufio.NewReader(rdr)
 
-	surturl, err := buf.ReadString(` `)
+	surturl, err := buf.ReadString(' ')
 	if err != nil {
 		return err
 	}
@@ -57,7 +56,7 @@ func (r *Record) UnmarshalCDXJ(data []byte) (err, error) {
 		return err
 	}
 
-	ts, err := buf.ReadString(` `)
+	ts, err := buf.ReadString(' ')
 	if err != nil {
 		return err
 	}
@@ -66,7 +65,7 @@ func (r *Record) UnmarshalCDXJ(data []byte) (err, error) {
 		return err
 	}
 
-	rt, err := buf.ReadString(` `)
+	rt, err := buf.ReadString(' ')
 	if err != nil {
 		return err
 	}
@@ -87,7 +86,12 @@ func (r *Record) MarshalCDXJ() ([]byte, error) {
 		return nil, err
 	}
 
-	return []byte(fmt.Sprintf("%s %s %s %s\n", SURT(r.Uri), r.Timestamp.In(time.UTC).Format(time.RFC3339), r.RecordType, string(jb)))
+	suri, err := SURT(r.Uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return []byte(fmt.Sprintf("%s %s %s %s\n", suri, r.Timestamp.In(time.UTC).Format(time.RFC3339), r.RecordType, string(jb))), nil
 }
 
 // Canonicalization is applied to URIs to remove trivial
@@ -132,15 +136,15 @@ func SURT(rawurl string) (string, error) {
 
 	surt += ">"
 
-	return surt
+	return surt, nil
 }
 
 // ParseSURTUrl turns a SURT'ed url back into a normal Url
 // TODO - should accept SURT urls that contain a scheme
 func ParseSURTUrl(surturl string) (string, error) {
-	buf := bytes.NewReader(strings.TrimLeft(surturl, "("))
+	buf := strings.NewReader(strings.TrimLeft(surturl, "("))
 	s := bufio.NewReader(buf)
-	surl, err := s.ReadString(`)`)
+	surl, err := s.ReadString(')')
 	if err != nil {
 		return surturl, err
 	}
@@ -148,7 +152,7 @@ func ParseSURTUrl(surturl string) (string, error) {
 	reverseSlice(sl)
 	hostname := strings.Join(sl, ".")
 
-	path, err := s.ReadString(`>`)
+	path, err := s.ReadString('>')
 	if err != nil {
 		return surturl, err
 	}

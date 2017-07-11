@@ -7,7 +7,7 @@ import (
 )
 
 // writer will write the following header:
-const header = "!OpenWayback-CDXJ 1.0"
+var header = []byte("!OpenWayback-CDXJ 1.0")
 
 // Writer writes to an io.Writer, create one with NewWriter
 // You *must* call call Close to write the record to the
@@ -21,7 +21,7 @@ type Writer struct {
 func NewWriter(w io.Writer) *Writer {
 	return &Writer{
 		writer:  w,
-		records: &Records{},
+		records: make(Records, 0),
 	}
 }
 
@@ -37,14 +37,14 @@ func (w *Writer) Write(r *Record) error {
 
 // Close dumps the writer to the underlying io.Writer
 func (w *Writer) Close() error {
-	sort(w.records)
+	sort.Sort(w.records)
 
-	if err := w.writer.Write(header); err != nil {
+	if _, err := w.writer.Write(header); err != nil {
 		return err
 	}
 
 	for _, rec := range w.records {
-		if err := w.Write(rec); err != nil {
+		if _, err := w.writer.Write(rec); err != nil {
 			return err
 		}
 	}
@@ -56,4 +56,4 @@ type Records [][]byte
 
 func (a Records) Len() int           { return len(a) }
 func (a Records) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a Records) Less(i, j int) bool { return bytes.Compare(a, b) == -1 }
+func (a Records) Less(i, j int) bool { return bytes.Compare(a[i], a[j]) == -1 }
