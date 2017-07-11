@@ -2,7 +2,55 @@ package cdxj
 
 import (
 	"fmt"
+	"testing"
+	"time"
 )
+
+func TestUnSURTUrl(t *testing.T) {
+	cases := []struct {
+		in, out string
+		err     error
+	}{
+		{"(com,cnn,)/world", "cnn.com/world", nil},
+		{"(uk,co,cnn,)/world?foo=bar", "cnn.co.uk/world?foo=bar", nil},
+	}
+
+	for i, c := range cases {
+		got, err := UnSURTUrl(c.in)
+		if err != c.err {
+			t.Errorf("case %d error mismatch: %s != %s", i, c.err, err)
+			continue
+		}
+
+		if c.out != got {
+			t.Errorf("case %d mismatch. expected: '%s', got: '%s'", i, c.out, got)
+			continue
+		}
+	}
+}
+
+func TestRecordUnmarshalCDXJ(t *testing.T) {
+	cases := []struct {
+		data []byte
+		out  *Record
+		err  error
+	}{
+		{[]byte(`(com,cnn,)/world 2015-09-03T13:27:52Z response {"a" : 0, "b" : "b", "c" : false }`), &Record{"cnn.com/world", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), "response", map[string]interface{}{"a": 0, "b": "b", "c": false}}, nil},
+	}
+
+	for i, c := range cases {
+		r := &Record{}
+		if err := r.UnmarshalCDXJ(c.data); err != c.err {
+			t.Errorf("case %d error mismatch: %s != %s", i, c.err, err)
+			continue
+		}
+
+		if err := CompareRecords(c.out, r); err != nil {
+			t.Errorf("case %d record mismatch: %s", i, err.Error())
+			continue
+		}
+	}
+}
 
 func CompareRecordSlices(a, b []*Record) error {
 	if len(a) != len(b) {

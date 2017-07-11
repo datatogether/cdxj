@@ -51,7 +51,7 @@ func (r *Record) UnmarshalCDXJ(data []byte) (err error) {
 	if err != nil {
 		return err
 	}
-	r.Uri, err = ParseSURTUrl(surturl)
+	r.Uri, err = UnSURTUrl(surturl)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (r *Record) UnmarshalCDXJ(data []byte) (err error) {
 	if err != nil {
 		return err
 	}
-	r.Timestamp, err = time.Parse(time.RFC3339, ts)
+	r.Timestamp, err = time.Parse(time.RFC3339, strings.TrimSpace(ts))
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (r *Record) UnmarshalCDXJ(data []byte) (err error) {
 	if err != nil {
 		return err
 	}
-	r.RecordType = rt
+	r.RecordType = rt[:len(rt)-1]
 
 	r.JSON = map[string]interface{}{}
 	if err := json.NewDecoder(buf).Decode(&r.JSON); err != nil {
@@ -86,7 +86,7 @@ func (r *Record) MarshalCDXJ() ([]byte, error) {
 		return nil, err
 	}
 
-	suri, err := SURT(r.Uri)
+	suri, err := SURTUrl(r.Uri)
 	if err != nil {
 		return nil, err
 	}
@@ -110,14 +110,14 @@ func CannonicalizeURL(rawurl string) string {
 	return rawurl
 }
 
-// SURT is a transformation applied to URIs which makes their left-to-right
+// SURTUrl is a transformation applied to URIs which makes their left-to-right
 // representation better match the natural hierarchy of domain  names.
 // A URI `<scheme://domain.tld/path?query>` has SURT form `<scheme://(tld,domain,)/path?query>`.
 // Conversion to SURT form also involves making all characters lowercase,
 // and changing the 'https' scheme to 'http'. Further, the '/' after  a URI authority component --
 // for example, the third slash in a regular HTTP URI -- will only appear in the SURT
 // form if it appeared in the plain URI form.
-func SURT(rawurl string) (string, error) {
+func SURTUrl(rawurl string) (string, error) {
 	rawurl = strings.ToLower(rawurl)
 	u, err := url.Parse(rawurl)
 	if err != nil {
@@ -139,25 +139,22 @@ func SURT(rawurl string) (string, error) {
 	return surt, nil
 }
 
-// ParseSURTUrl turns a SURT'ed url back into a normal Url
+// UnSURTUrl turns a SURT'ed url back into a normal Url
 // TODO - should accept SURT urls that contain a scheme
-func ParseSURTUrl(surturl string) (string, error) {
-	buf := strings.NewReader(strings.TrimLeft(surturl, "("))
+func UnSURTUrl(surturl string) (string, error) {
+	surturl = strings.Trim(surturl, "(> \n")
+	buf := strings.NewReader(surturl)
 	s := bufio.NewReader(buf)
-	surl, err := s.ReadString(')')
+
+	base, err := s.ReadString(')')
 	if err != nil {
 		return surturl, err
 	}
-	sl := strings.Split(surl, ",")
+	sl := strings.Split(strings.Trim(base, ",)"), ",")
 	reverseSlice(sl)
 	hostname := strings.Join(sl, ".")
 
-	path, err := s.ReadString('>')
-	if err != nil {
-		return surturl, err
-	}
-
-	return fmt.Sprintf("%s%s", hostname, path), nil
+	return fmt.Sprintf("%s%s", hostname, surturl[len(base):]), nil
 }
 
 // reverseSlice reverses a slice of strings

@@ -31,17 +31,19 @@ func NewReader(r io.Reader) *Reader {
 func (r *Reader) Read() (*Record, error) {
 	rec := &Record{}
 	// scan until we have a non-header record
-	for {
-		r.s.Scan()
-		if bytes.HasPrefix(r.s.Bytes(), []byte("!")) {
+	for r.s.Scan() {
+		if len(r.s.Bytes()) == 0 || bytes.HasPrefix(r.s.Bytes(), []byte("!")) {
 			continue
 		}
 		break
 	}
+	if r.s.Err() != nil {
+		return nil, r.s.Err()
+	}
+
 	if err := rec.UnmarshalCDXJ(r.s.Bytes()); err != nil {
 		return nil, err
 	}
-
 	r.record++
 	return rec, nil
 }
