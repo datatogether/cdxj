@@ -19,7 +19,7 @@ import (
 	"github.com/puerkitobio/purell"
 )
 
-var UrlNormalizationScheme = purell.FlagsSafe
+var CanonicalizationScheme = purell.FlagsSafe
 
 // Following the header lines, each additional line should represent exactly one resource in a web archive.
 // Typically in a WARC (ISO 28500) or ARC file, although the exact storage of the resource is not defined
@@ -129,7 +129,7 @@ func (r *Record) MarshalCDXJ() ([]byte, error) {
 // applied to the URIs when performing searches.
 // Otherwise they may not match correctly.
 func CanonicalizeURL(rawurl string) (string, error) {
-	return purell.NormalizeURLString(rawurl, UrlNormalizationScheme)
+	return purell.NormalizeURLString(rawurl, CanonicalizationScheme)
 }
 
 // SURTUrl is a transformation applied to URIs which makes their left-to-right
@@ -182,6 +182,20 @@ func UnSURTUrl(surturl string) (string, error) {
 	hostname := strings.Join(sl, ".")
 
 	return fmt.Sprintf("%s%s", hostname, surturl[len(base):]), nil
+}
+
+// UnSURTPath gives the path element of a SURT'ed url
+func UnSURTPath(surturl string) (string, error) {
+	surturl = strings.Trim(surturl, "(> \n")
+	buf := strings.NewReader(surturl)
+	s := bufio.NewReader(buf)
+
+	base, err := s.ReadString(')')
+	if err != nil {
+		return surturl, err
+	}
+
+	return surturl[len(base):], nil
 }
 
 // reverseSlice reverses a slice of strings

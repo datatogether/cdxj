@@ -57,6 +57,31 @@ func TestUnSURTUrl(t *testing.T) {
 	}
 }
 
+func TestUnSURTPath(t *testing.T) {
+	cases := []struct {
+		in, out string
+		err     error
+	}{
+		{"(com,cnn,)/world", "/world", nil},
+		{"com,cnn,)/world>", "/world", nil},
+		{"com,cnn)/world", "/world", nil},
+		{"(uk,co,cnn,)/world?foo=bar", "/world?foo=bar", nil},
+	}
+
+	for i, c := range cases {
+		got, err := UnSURTPath(c.in)
+		if err != c.err {
+			t.Errorf("case %d error mismatch: %s != %s", i, c.err, err)
+			continue
+		}
+
+		if c.out != got {
+			t.Errorf("case %d mismatch. expected: '%s', got: '%s'", i, c.out, got)
+			continue
+		}
+	}
+}
+
 func TestRecordUnmarshalCDXJ(t *testing.T) {
 	cases := []struct {
 		data []byte
