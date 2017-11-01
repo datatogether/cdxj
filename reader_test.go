@@ -4,6 +4,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/datatogether/warc"
 )
 
 const eg = `!OpenWayback-CDXJ 1.0
@@ -13,9 +15,9 @@ const eg = `!OpenWayback-CDXJ 1.0
 `
 
 var parsed = []*Record{
-	&Record{"cnn.com/world", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), "response", map[string]interface{}{"a": 0, "b": "b", "c": false}},
-	&Record{"rpms.ac.uk/", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), "request", map[string]interface{}{"frequency": 241, "spread": 3}},
-	&Record{"bbc.co.uk/images", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), "response", map[string]interface{}{"frequency": 725, "spread": 1}},
+	&Record{"cnn.com/world", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeResponse, map[string]interface{}{"a": 0, "b": "b", "c": false}},
+	&Record{"rpms.ac.uk/", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeRequest, map[string]interface{}{"frequency": 241, "spread": 3}},
+	&Record{"bbc.co.uk/images", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeResponse, map[string]interface{}{"frequency": 725, "spread": 1}},
 }
 
 func TestReader(t *testing.T) {

@@ -2,6 +2,7 @@ package cdxj
 
 import (
 	"fmt"
+	"github.com/datatogether/warc"
 	"testing"
 	"time"
 )
@@ -62,7 +63,7 @@ func TestRecordUnmarshalCDXJ(t *testing.T) {
 		out  *Record
 		err  error
 	}{
-		{[]byte(`(com,cnn,)/world 2015-09-03T13:27:52Z response {"a" : 0, "b" : "b", "c" : false }`), &Record{"cnn.com/world", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), "response", map[string]interface{}{"a": 0, "b": "b", "c": false}}, nil},
+		{[]byte(`(com,cnn,)/world 2015-09-03T13:27:52Z response {"a" : 0, "b" : "b", "c" : false }`), &Record{"cnn.com/world", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeResponse, map[string]interface{}{"a": 0, "b": "b", "c": false}}, nil},
 	}
 
 	for i, c := range cases {

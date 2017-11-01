@@ -14,7 +14,12 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/datatogether/warc"
+	"github.com/puerkitobio/purell"
 )
+
+var UrlNormalizationScheme = purell.FlagsSafe
 
 // Following the header lines, each additional line should represent exactly one resource in a web archive.
 // Typically in a WARC (ISO 28500) or ARC file, although the exact storage of the resource is not defined
@@ -34,12 +39,30 @@ type Record struct {
 	// Indicates what type of record the current line refers to.
 	// This field is fully compatible with WARC 1.0 definition of
 	// WARC-Type (chapter 5.5 and chapter 6).
-	RecordType string
+	RecordType warc.RecordType
 	// This should contain fully valid JSON data. The only limitation, beyond those
 	// imposed by JSON encoding rules, is that this may not contain any newline
 	// characters, either in Unix (0x0A) or Windows form (0x0D0A).
 	// The first occurance of a 0x0A constitutes the end of this field (and the record).
 	JSON map[string]interface{}
+}
+
+func CreateRecord(rec *warc.Record) (*Record, error) {
+	can, err := CanonicalizeURL(rec.TargetUri())
+	if err != nil {
+		return nil, err
+	}
+
+	surt, err := SURTUrl(can)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Record{
+		Uri:        surt,
+		Timestamp:  rec.Date(),
+		RecordType: rec.Type,
+	}, nil
 }
 
 // UnmarshalCDXJ reads a cdxj record from a byte slice
@@ -69,7 +92,7 @@ func (r *Record) UnmarshalCDXJ(data []byte) (err error) {
 	if err != nil {
 		return err
 	}
-	r.RecordType = rt[:len(rt)-1]
+	r.RecordType = warc.ParseRecordType(strings.TrimSpace(rt))
 
 	r.JSON = map[string]interface{}{}
 	if err := json.NewDecoder(buf).Decode(&r.JSON); err != nil {
@@ -102,12 +125,11 @@ func (r *Record) MarshalCDXJ() ([]byte, error) {
 // OpenWayback implements its own canonicalization process.
 // Typically, it will be applied to the searchable URIs in CDXJ files. You can,
 // however, use any canonicalization scheme you care for (including none).
-// You must simple ensure that the same canonicalization process is
+// You must simply ensure that the same canonicalization process is
 // applied to the URIs when performing searches.
 // Otherwise they may not match correctly.
-// TODO - import github.com/puerkitobio/purell to canonicalize urls
-func CanonicalizeURL(rawurl string) string {
-	return rawurl
+func CanonicalizeURL(rawurl string) (string, error) {
+	return purell.NormalizeURLString(rawurl, UrlNormalizationScheme)
 }
 
 // SURTUrl is a transformation applied to URIs which makes their left-to-right
