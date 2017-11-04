@@ -65,6 +65,7 @@ func TestUnSURTPath(t *testing.T) {
 		{"(com,cnn,)/world", "/world", nil},
 		{"com,cnn,)/world>", "/world", nil},
 		{"com,cnn)/world", "/world", nil},
+		{"com,cnn)", "/", nil},
 		{"(uk,co,cnn,)/world?foo=bar", "/world?foo=bar", nil},
 	}
 

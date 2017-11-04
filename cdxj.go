@@ -195,7 +195,12 @@ func UnSURTPath(surturl string) (string, error) {
 		return surturl, err
 	}
 
-	return surturl[len(base):], nil
+	path := surturl[len(base):]
+	if len(path) == 0 || path[0] != '/' {
+		path = "/" + path
+	}
+
+	return path, nil
 }
 
 // reverseSlice reverses a slice of strings
