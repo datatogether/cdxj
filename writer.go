@@ -14,14 +14,14 @@ var header = []byte("!OpenWayback-CDXJ 1.0\n")
 // specified writer
 type Writer struct {
 	writer  io.Writer
-	records Records
+	records ByteRecords
 }
 
 // NewWriter allocates a new CDXJ Writer
 func NewWriter(w io.Writer) *Writer {
 	return &Writer{
 		writer:  w,
-		records: make(Records, 0),
+		records: make(ByteRecords, 0),
 	}
 }
 
@@ -51,9 +51,9 @@ func (w *Writer) Close() error {
 	return nil
 }
 
-// Records implements sortable for a slice marshaled CDXJ byte slices
-type Records [][]byte
+// ByteRecords implements sortable for a slice marshaled CDXJ byte slices
+type ByteRecords [][]byte
 
-func (a Records) Len() int           { return len(a) }
-func (a Records) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a Records) Less(i, j int) bool { return bytes.Compare(a[i], a[j]) == -1 }
+func (a ByteRecords) Len() int           { return len(a) }
+func (a ByteRecords) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByteRecords) Less(i, j int) bool { return bytes.Compare(a[i], a[j]) == -1 }

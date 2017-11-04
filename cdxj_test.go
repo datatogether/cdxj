@@ -2,6 +2,7 @@ package cdxj
 
 import (
 	"fmt"
+	"github.com/datatogether/warc"
 	"testing"
 	"time"
 )
@@ -56,13 +57,39 @@ func TestUnSURTUrl(t *testing.T) {
 	}
 }
 
+func TestUnSURTPath(t *testing.T) {
+	cases := []struct {
+		in, out string
+		err     error
+	}{
+		{"(com,cnn,)/world", "/world", nil},
+		{"com,cnn,)/world>", "/world", nil},
+		{"com,cnn)/world", "/world", nil},
+		{"com,cnn)", "/", nil},
+		{"(uk,co,cnn,)/world?foo=bar", "/world?foo=bar", nil},
+	}
+
+	for i, c := range cases {
+		got, err := UnSURTPath(c.in)
+		if err != c.err {
+			t.Errorf("case %d error mismatch: %s != %s", i, c.err, err)
+			continue
+		}
+
+		if c.out != got {
+			t.Errorf("case %d mismatch. expected: '%s', got: '%s'", i, c.out, got)
+			continue
+		}
+	}
+}
+
 func TestRecordUnmarshalCDXJ(t *testing.T) {
 	cases := []struct {
 		data []byte
 		out  *Record
 		err  error
 	}{
-		{[]byte(`(com,cnn,)/world 2015-09-03T13:27:52Z response {"a" : 0, "b" : "b", "c" : false }`), &Record{"cnn.com/world", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), "response", map[string]interface{}{"a": 0, "b": "b", "c": false}}, nil},
+		{[]byte(`(com,cnn,)/world 2015-09-03T13:27:52Z response {"a" : 0, "b" : "b", "c" : false }`), &Record{"cnn.com/world", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeResponse, map[string]interface{}{"a": 0, "b": "b", "c": false}}, nil},
 	}
 
 	for i, c := range cases {
