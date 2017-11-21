@@ -6,13 +6,11 @@ import (
 	"io"
 )
 
-// A Reader reads records from a CSV-encoded file.
+// A Reader reads records from a CDXJ-encoded io.Reader.
 //
 // As returned by NewReader, a Reader expects input conforming to RFC 4180.
 // The exported fields can be changed to customize the details before the
 // first call to Read or ReadAll.
-//
-//
 type Reader struct {
 	// record counter
 	record int
