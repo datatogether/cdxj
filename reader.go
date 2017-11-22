@@ -3,8 +3,12 @@ package cdxj
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 )
+
+// headerPrefix is the required prefix to be a valid cdxj file
+var headerPrefix = []byte("!OpenWayback-CDXJ")
 
 // A Reader reads records from a CDXJ-encoded io.Reader.
 //
@@ -62,4 +66,27 @@ func (r *Reader) ReadAll() ([]*Record, error) {
 	}
 
 	return records, nil
+}
+
+// Validate checks that an io.Reader is a valid cdxj format
+func Validate(r io.Reader) error {
+	hasHeader := false
+	s := bufio.NewScanner(r)
+	// scan for header
+	for s.Scan() {
+		if s.Text() != "" {
+			if !bytes.Contains([]byte(s.Text()), headerPrefix) {
+				return fmt.Errorf("invalid format, missing cdxj header")
+			}
+			hasHeader = true
+			break
+		}
+	}
+
+	if !hasHeader {
+		return fmt.Errorf("invalid format, missing cdxj header")
+	}
+
+	// TODO - validate rows
+	return nil
 }

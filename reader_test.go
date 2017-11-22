@@ -1,6 +1,7 @@
 package cdxj
 
 import (
+	"bytes"
 	"strings"
 	"testing"
 	"time"
@@ -30,5 +31,23 @@ func TestReader(t *testing.T) {
 	if err := CompareRecordSlices(records, parsed); err != nil {
 		t.Error(err)
 		return
+	}
+}
+
+func TestValidate(t *testing.T) {
+	cases := []struct {
+		input string
+		err   string
+	}{
+		{"", "invalid format, missing cdxj header"},
+		{eg, ""},
+	}
+
+	for i, c := range cases {
+		err := Validate(bytes.NewBufferString(c.input))
+		if !(err == nil && c.err == "" || err != nil && err.Error() == c.err) {
+			t.Errorf("case %d error mismatch. expected: %s, got: %s", i, c.err, err)
+			continue
+		}
 	}
 }

@@ -62,6 +62,7 @@ func CreateRecord(rec *warc.Record) (*Record, error) {
 		Uri:        surt,
 		Timestamp:  rec.Date(),
 		RecordType: rec.Type,
+		JSON:       map[string]interface{}{},
 	}, nil
 }
 
