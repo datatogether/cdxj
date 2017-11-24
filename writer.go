@@ -38,7 +38,6 @@ func (w *Writer) Write(r *Record) error {
 // Close dumps the writer to the underlying io.Writer
 func (w *Writer) Close() error {
 	sort.Sort(w.records)
-
 	if _, err := w.writer.Write(header); err != nil {
 		return err
 	}
