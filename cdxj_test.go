@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestSURTUrl(t *testing.T) {
+func TestSurtURL(t *testing.T) {
 	cases := []struct {
 		in, out string
 		err     error
@@ -19,7 +19,7 @@ func TestSURTUrl(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		got, err := SURTUrl(c.in)
+		got, err := SurtURL(c.in)
 		if err != c.err {
 			t.Errorf("case %d error mismatch: %s != %s", i, c.err, err)
 			continue
@@ -32,7 +32,7 @@ func TestSURTUrl(t *testing.T) {
 	}
 }
 
-func TestUnSURTUrl(t *testing.T) {
+func TestUnSurtURL(t *testing.T) {
 	cases := []struct {
 		in, out string
 		err     error
@@ -44,7 +44,7 @@ func TestUnSURTUrl(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		got, err := UnSURTUrl(c.in)
+		got, err := UnSurtURL(c.in)
 		if err != c.err {
 			t.Errorf("case %d error mismatch: %s != %s", i, c.err, err)
 			continue
@@ -57,7 +57,7 @@ func TestUnSURTUrl(t *testing.T) {
 	}
 }
 
-func TestUnSURTPath(t *testing.T) {
+func TestUnSurtPath(t *testing.T) {
 	cases := []struct {
 		in, out string
 		err     error
@@ -70,7 +70,7 @@ func TestUnSURTPath(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		got, err := UnSURTPath(c.in)
+		got, err := UnSurtPath(c.in)
 		if err != c.err {
 			t.Errorf("case %d error mismatch: %s != %s", i, c.err, err)
 			continue
@@ -128,8 +128,8 @@ func CompareRecords(a, b *Record) error {
 		return nil
 	}
 
-	if a.Uri != b.Uri {
-		return fmt.Errorf("record uri mismatch: %s != %s", a.Uri, b.Uri)
+	if a.URI != b.URI {
+		return fmt.Errorf("record uri mismatch: %s != %s", a.URI, b.URI)
 	}
 
 	if !a.Timestamp.Equal(b.Timestamp) {

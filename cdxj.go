@@ -1,4 +1,4 @@
-// cdx implements the CDXJ file format used by OpenWayback 3.0.0 (and later) to index web archive contents
+// Package cdxj implements the CDXJ file format used by OpenWayback 3.0.0 (and later) to index web archive contents
 // (notably in  WARC and ARC files) and make them searchable via a resource resolution service.
 // The format builds on the CDX file format originally developed by the Internet Archive
 // for the indexing behind the WaybackMachine.
@@ -19,8 +19,10 @@ import (
 	"github.com/puerkitobio/purell"
 )
 
+// CanonicalizationScheme is the default method this package uses to canonicalize urls
 var CanonicalizationScheme = purell.FlagsSafe
 
+// Record is an entry in a cdxj index, consisting of uri, timestamp, recordtype, and metadata fields
 // Following the header lines, each additional line should represent exactly one resource in a web archive.
 // Typically in a WARC (ISO 28500) or ARC file, although the exact storage of the resource is not defined
 // by this specification. Each such line shall be refered to as a *record*.
@@ -30,7 +32,7 @@ type Record struct {
 	// 1. Canonicalization - See Appendix A
 	// 2. Sort-friendly URI Reordering Transform (SURT)
 	// 3. The scheme is dropped from the SURT format
-	Uri string
+	URI string
 	// should correspond to the WARC-Date timestamp as of WARC 1.1.
 	// The timestamp shall represent the instant that data capture for record
 	// creation began.
@@ -47,19 +49,20 @@ type Record struct {
 	JSON map[string]interface{}
 }
 
+// CreateRecord generates a cdxj record from a WARC record
 func CreateRecord(rec *warc.Record) (*Record, error) {
-	can, err := CanonicalizeURL(rec.TargetUri())
+	can, err := CanonicalizeURL(rec.TargetURI())
 	if err != nil {
 		return nil, err
 	}
 
-	surt, err := SURTUrl(can)
+	surt, err := SurtURL(can)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Record{
-		Uri:        surt,
+		URI:        surt,
 		Timestamp:  rec.Date(),
 		RecordType: rec.Type,
 		JSON:       map[string]interface{}{},
@@ -75,7 +78,7 @@ func (r *Record) UnmarshalCDXJ(data []byte) (err error) {
 	if err != nil {
 		return err
 	}
-	r.Uri, err = UnSURTUrl(surturl)
+	r.URI, err = UnSurtURL(surturl)
 	if err != nil {
 		return err
 	}
@@ -110,7 +113,7 @@ func (r *Record) MarshalCDXJ() ([]byte, error) {
 		return nil, err
 	}
 
-	suri, err := SURTUrl(r.Uri)
+	suri, err := SurtURL(r.URI)
 	if err != nil {
 		return nil, err
 	}
@@ -118,6 +121,7 @@ func (r *Record) MarshalCDXJ() ([]byte, error) {
 	return []byte(fmt.Sprintf("%s %s %s %s\n", suri, r.Timestamp.In(time.UTC).Format(time.RFC3339), r.RecordType, string(jb))), nil
 }
 
+// CanonicalizeURL takes raw url strings & returns their normalized version
 // Canonicalization is applied to URIs to remove trivial
 // differences in the URIs that do not  reflect that the
 // URI reference different resources.
@@ -133,14 +137,14 @@ func CanonicalizeURL(rawurl string) (string, error) {
 	return purell.NormalizeURLString(rawurl, CanonicalizationScheme)
 }
 
-// SURTUrl is a transformation applied to URIs which makes their left-to-right
+// SurtURL is a transformation applied to URIs which makes their left-to-right
 // representation better match the natural hierarchy of domain  names.
 // A URI `<scheme://domain.tld/path?query>` has SURT form `<scheme://(tld,domain,)/path?query>`.
 // Conversion to SURT form also involves making all characters lowercase,
 // and changing the 'https' scheme to 'http'. Further, the '/' after  a URI authority component --
 // for example, the third slash in a regular HTTP URI -- will only appear in the SURT
 // form if it appeared in the plain URI form.
-func SURTUrl(rawurl string) (string, error) {
+func SurtURL(rawurl string) (string, error) {
 	rawurl = strings.ToLower(rawurl)
 
 	// TODO - if the query param contains a url of some kind, and the scheme is missing
@@ -167,9 +171,9 @@ func SURTUrl(rawurl string) (string, error) {
 	return surt, nil
 }
 
-// UnSURTUrl turns a SURT'ed url back into a normal Url
+// UnSurtURL turns a SURT'ed url back into a normal Url
 // TODO - should accept SURT urls that contain a scheme
-func UnSURTUrl(surturl string) (string, error) {
+func UnSurtURL(surturl string) (string, error) {
 	surturl = strings.Trim(surturl, "(> \n")
 	buf := strings.NewReader(surturl)
 	s := bufio.NewReader(buf)
@@ -185,8 +189,8 @@ func UnSURTUrl(surturl string) (string, error) {
 	return fmt.Sprintf("%s%s", hostname, surturl[len(base):]), nil
 }
 
-// UnSURTPath gives the path element of a SURT'ed url
-func UnSURTPath(surturl string) (string, error) {
+// UnSurtPath gives the path element of a SURT'ed url
+func UnSurtPath(surturl string) (string, error) {
 	surturl = strings.Trim(surturl, "(> \n")
 	buf := strings.NewReader(surturl)
 	s := bufio.NewReader(buf)
