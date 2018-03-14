@@ -5,7 +5,7 @@
 [![GitHub](https://img.shields.io/badge/project-Data_Together-487b57.svg?style=flat-square)](http://github.com/datatogether)
 [![Slack](https://img.shields.io/badge/slack-Archivers-b44e88.svg?style=flat-square)](https://archivers-slack.herokuapp.com/)
 [![GoDoc](https://godoc.org/github.com/datatogether/cdxj?status.svg)](http://godoc.org/github.com/datatogether/cdxj)
-[![License](https://img.shields.io/github/license/datatogether/cdxj.svg)](./LICENSE) 
+[![License](https://img.shields.io/github/license/datatogether/cdxj.svg?style=flat-square)](./LICENSE) 
 
 Golang package implementing the CDXJ file format used by OpenWayback
 3.0.0 (and later) to index web archive contents (notably in WARC and
@@ -18,7 +18,7 @@ flexiblity in the inclusion of additional data.
 
 ## License & Copyright
 
-Copyright (C) 2017 Data Together
+Copyright (C) 2017 Data Together  
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU AFFERO General Public License as published by the Free Software
 Foundation, version 3.0.
