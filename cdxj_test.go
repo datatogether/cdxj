@@ -2,9 +2,10 @@ package cdxj
 
 import (
 	"fmt"
-	"github.com/datatogether/warc"
 	"testing"
 	"time"
+
+	"github.com/datatogether/warc"
 )
 
 func TestSurtURL(t *testing.T) {
@@ -12,10 +13,10 @@ func TestSurtURL(t *testing.T) {
 		in, out string
 		err     error
 	}{
-		{"cnn.com/world", "(com,cnn,)/world>", nil},
-		{"http://cnn.com/world", "(com,cnn,)/world>", nil},
-		{"https://cnn.com/world", "(com,cnn,)/world>", nil},
-		{"ftp://cnn.co.uk/world?foo=bar", "(uk,co,cnn,)/world?foo=bar>", nil},
+		// {"cnn.com/world", "(com,cnn,)/world", nil},
+		{"http://cnn.com/world", "(com,cnn,)/world", nil},
+		{"https://cnn.com/world", "(com,cnn,)/world", nil},
+		{"ftp://cnn.co.uk/world?foo=bar", "(uk,co,cnn,)/world?foo=bar", nil},
 	}
 
 	for i, c := range cases {

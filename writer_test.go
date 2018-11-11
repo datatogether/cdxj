@@ -10,9 +10,9 @@ import (
 
 func TestWriter(t *testing.T) {
 	records := []*Record{
-		&Record{"cnn.com/world", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeResponse, map[string]interface{}{"a": 0, "b": "b", "c": false}},
-		&Record{"rpms.ac.uk/", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeRequest, map[string]interface{}{"frequency": 241, "spread": 3}},
-		&Record{"bbc.co.uk/images", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeResponse, map[string]interface{}{"frequency": 725, "spread": 1}},
+		NewRecord("https://cnn.com/world", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeResponse, map[string]interface{}{"a": 0, "b": "b", "c": false}),
+		NewRecord("https://rpms.ac.uk/", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeRequest, map[string]interface{}{"frequency": 241, "spread": 3}),
+		NewRecord("https://bbc.co.uk/images", time.Date(2015, time.September, 3, 13, 27, 52, 0, time.UTC), warc.RecordTypeResponse, map[string]interface{}{"frequency": 725, "spread": 1}),
 	}
 	buf := &bytes.Buffer{}
 

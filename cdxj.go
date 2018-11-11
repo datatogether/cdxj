@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/purell"
 	"github.com/datatogether/warc"
-	"github.com/puerkitobio/purell"
 )
 
 // CanonicalizationScheme is the default method this package uses to canonicalize urls
@@ -49,8 +49,53 @@ type Record struct {
 	JSON map[string]interface{}
 }
 
-// CreateRecord generates a cdxj record from a WARC record
-func CreateRecord(rec *warc.Record) (*Record, error) {
+// NewResponseRecord is a convenience method to create a record with the Response record type
+func NewResponseRecord(url string, ts time.Time, data map[string]interface{}) *Record {
+	return NewRecord(url, ts, warc.RecordTypeResponse, data)
+}
+
+// NewResourceRecord is a convenience method to create a record with the Resource record type
+func NewResourceRecord(url string, ts time.Time, data map[string]interface{}) *Record {
+	return NewRecord(url, ts, warc.RecordTypeResource, data)
+}
+
+// NewRequestRecord is a convenience method to create a record with the RequestR record type
+func NewRequestRecord(url string, ts time.Time, data map[string]interface{}) *Record {
+	return NewRecord(url, ts, warc.RecordTypeRequest, data)
+}
+
+// NewMetadataRecord is a convenience method to create a record with the Metadata record type
+func NewMetadataRecord(url string, ts time.Time, data map[string]interface{}) *Record {
+	return NewRecord(url, ts, warc.RecordTypeMetadata, data)
+}
+
+// NewRevisitRecord is a convenience method to create a record with the RevisitR record type
+func NewRevisitRecord(url string, ts time.Time, data map[string]interface{}) *Record {
+	return NewRecord(url, ts, warc.RecordTypeRevisit, data)
+}
+
+// NewRecord creates a new cdxj record
+func NewRecord(url string, ts time.Time, rt warc.RecordType, data map[string]interface{}) *Record {
+	can, err := CanonicalizeURL(url)
+	if err != nil {
+		can = url
+	}
+
+	surt, err := SurtURL(can)
+	if err != nil {
+		surt = url
+	}
+
+	return &Record{
+		URI:        surt,
+		Timestamp:  ts,
+		RecordType: rt,
+		JSON:       data,
+	}
+}
+
+// NewRecordFromWARCRecord generates a cdxj record from a WARC record
+func NewRecordFromWARCRecord(rec *warc.Record) (*Record, error) {
 	can, err := CanonicalizeURL(rec.TargetURI())
 	if err != nil {
 		return nil, err
@@ -113,12 +158,7 @@ func (r *Record) MarshalCDXJ() ([]byte, error) {
 		return nil, err
 	}
 
-	suri, err := SurtURL(r.URI)
-	if err != nil {
-		return nil, err
-	}
-
-	return []byte(fmt.Sprintf("%s %s %s %s\n", suri, r.Timestamp.In(time.UTC).Format(time.RFC3339), r.RecordType, string(jb))), nil
+	return []byte(fmt.Sprintf("%s %s %s %s\n", r.URI, r.Timestamp.In(time.UTC).Format(time.RFC3339), r.RecordType, string(jb))), nil
 }
 
 // CanonicalizeURL takes raw url strings & returns their normalized version
@@ -149,9 +189,9 @@ func SurtURL(rawurl string) (string, error) {
 
 	// TODO - if the query param contains a url of some kind, and the scheme is missing
 	// this will fail, probably going to need to use regex :/
-	if !strings.Contains(rawurl, "://") {
-		rawurl = "http://" + rawurl
-	}
+	// if !strings.Contains(rawurl, "://") {
+	// 	rawurl = "http://" + rawurl
+	// }
 
 	u, err := url.Parse(rawurl)
 	if err != nil {
@@ -166,7 +206,7 @@ func SurtURL(rawurl string) (string, error) {
 		surt += fmt.Sprintf("?%s", u.RawQuery)
 	}
 
-	surt += ">"
+	// surt += ">"
 
 	return surt, nil
 }

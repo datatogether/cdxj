@@ -24,7 +24,7 @@ func (index Index) AddWARCRecords(recs warc.Records) (Index, error) {
 
 // AddWARCRecord adds creates a cdxj record from a WARC record and adds it to the index
 func (index Index) AddWARCRecord(rec *warc.Record) (Index, error) {
-	cdxjRec, err := CreateRecord(rec)
+	cdxjRec, err := NewRecordFromWARCRecord(rec)
 	if err != nil {
 		return index, err
 	}

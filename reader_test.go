@@ -10,13 +10,13 @@ import (
 )
 
 const eg = `!OpenWayback-CDXJ 1.0
-(com,cnn,)/world> 2015-09-03T13:27:52Z response {"a":0,"b":"b","c":false}
-(uk,ac,rpms,)/> 2015-09-03T13:27:52Z request {"frequency":241,"spread":3}
-(uk,co,bbc,)/images> 2015-09-03T13:27:52Z response {"frequency":725,"spread":1}
+(com,cnn,)/world 2015-09-03T13:27:52Z response {"a":0,"b":"b","c":false}
+(uk,ac,rpms,)/ 2015-09-03T13:27:52Z request {"frequency":241,"spread":3}
+(uk,co,bbc,)/images 2015-09-03T13:27:52Z response {"frequency":725,"spread":1}
 `
 
 const eg2 = `!OpenWayback-CDXJ 1.0
-((com,reddit,)> 2015-09-03T13:27:52Z request {}`
+((com,reddit,) 2015-09-03T13:27:52Z request {}`
 
 func TestReader(t *testing.T) {
 	cases := []struct {
